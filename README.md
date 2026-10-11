@@ -1,53 +1,55 @@
 # Wikipedia Attention Observatory
 
-> Big Data Storage and Processing — Project 5
+> Học phần: Big Data Storage and Processing — Project 5
 
-## 1. Overview
+## 1. Tổng quan
 
-**Wikipedia Attention Observatory** is a distributed Big Data platform for analyzing how public attention changes over time using Wikimedia hourly pageview data.
+**Wikipedia Attention Observatory** là một nền tảng Big Data phân tán dùng để phân tích cách mức độ chú ý của cộng đồng thay đổi theo thời gian dựa trên dữ liệu pageview theo giờ của Wikimedia.
 
-The system combines:
+Hệ thống kết hợp:
 
-- Historical batch processing
-- Replay-based streaming processing
-- Distributed storage and computation
-- OLAP analytical serving
-- Interactive visualization
-- Scalability and fault-tolerance experiments
+- Xử lý batch trên dữ liệu lịch sử
+- Xử lý streaming bằng cách replay dữ liệu lịch sử
+- Lưu trữ và xử lý phân tán
+- OLAP serving cho truy vấn phân tích
+- Dashboard tương tác
+- Thí nghiệm về khả năng mở rộng và khả năng chịu lỗi
 
-The project focuses on Big Data system design rather than only data analysis or dashboard development.
-
----
-
-## 2. Research Question
-
-> How can large-scale Wikipedia page-view streams be processed efficiently to identify rapid changes, short-lived bursts, sustained attention, and recurring temporal patterns?
+Mục tiêu của project không chỉ là phân tích dữ liệu Wikipedia, mà còn là xây dựng và đánh giá một hệ thống Big Data hoàn chỉnh.
 
 ---
 
-## 3. Dataset
+## 2. Câu hỏi nghiên cứu
 
-We use **Wikimedia hourly pageview dumps**.
+> Làm thế nào để xử lý hiệu quả luồng dữ liệu pageview Wikipedia quy mô lớn nhằm phát hiện các thay đổi nhanh, các đợt tăng chú ý ngắn hạn, sự chú ý kéo dài và các mẫu chú ý lặp lại theo thời gian?
 
-Initial target:
+---
 
-- English Wikipedia
-- Vietnamese Wikipedia
-- Approximately 1–3 years of historical data depending on available infrastructure
+## 3. Dữ liệu
 
-During development, smaller subsets will be used first:
+Nguồn dữ liệu chính:
+
+**Wikimedia hourly pageview dumps**
+
+Phạm vi dự kiến:
+
+- Wikipedia tiếng Anh
+- Wikipedia tiếng Việt
+- Khoảng 1–3 năm dữ liệu lịch sử, tùy khả năng hạ tầng
+
+Trong giai đoạn phát triển, nhóm nên tăng quy mô dần:
 
 ```text
-1–3 days
+1–3 ngày
     ↓
-1 month
+1 tháng
     ↓
-Several months
+Vài tháng
     ↓
-Final large-scale dataset
+Dataset lớn cuối cùng
 ```
 
-Possible curated fields:
+Các trường dữ liệu dự kiến sau khi làm sạch:
 
 ```text
 timestamp
@@ -63,7 +65,7 @@ hour
 
 ---
 
-## 4. Proposed Architecture
+## 4. Kiến trúc đề xuất
 
 ```text
                   Wikimedia Pageview Dumps
@@ -94,68 +96,66 @@ hour
                         Dashboard
 ```
 
-### Technology Stack
+### Công nghệ dự kiến
 
-| Layer | Technology |
+| Thành phần | Công nghệ |
 |---|---|
-| Data Source | Wikimedia Pageview Dumps |
+| Nguồn dữ liệu | Wikimedia Pageview Dumps |
 | Ingestion | Python |
 | Streaming | Apache Kafka |
 | Object Storage | MinIO |
-| File/Table Format | Parquet / Apache Iceberg |
+| Định dạng file/table | Parquet / Apache Iceberg |
 | Batch Processing | Apache Spark |
 | Stream Processing | Spark Structured Streaming |
 | OLAP / Serving | ClickHouse |
 | Dashboard | Apache Superset |
 | Deployment | Kubernetes |
-| Orchestration | Airflow — optional |
-| Monitoring | Prometheus / Grafana — optional |
+| Orchestration | Airflow — tùy chọn |
+| Monitoring | Prometheus / Grafana — tùy chọn |
 
 ---
 
-## 5. Main Analytics
+## 5. Các phân tích chính
 
 ### Top Pages
 
-- Top pages by hour
-- Top pages by day
-- Top pages by week
+- Top page theo giờ
+- Top page theo ngày
+- Top page theo tuần
 
-### Traffic Patterns
+### Mẫu truy cập theo thời gian
 
-- Hourly traffic
-- Daily traffic
-- Weekly patterns
-- Long-tail pageview distribution
+- Lưu lượng theo giờ
+- Lưu lượng theo ngày
+- Mẫu theo tuần
+- Phân phối long-tail của pageview
 
-### Attention Detection
+### Phát hiện mức độ chú ý
 
-Identify:
+Phát hiện:
 
-- Rapid-growth pages
-- Attention bursts
-- Burst duration
+- Trang tăng trưởng nhanh
+- Attention burst
+- Thời lượng burst
 - Short-lived attention
 - Sustained attention
 - Recurring attention
 
-### Language Comparison
+### So sánh ngôn ngữ
 
-Compare attention patterns between:
+So sánh khi có ý nghĩa giữa:
 
 ```text
-Vietnamese Wikipedia
+Wikipedia tiếng Việt
 vs
-English Wikipedia
+Wikipedia tiếng Anh
 ```
-
-where meaningful.
 
 ---
 
 ## 6. Attention Metric
 
-An initial baseline can use a standardized attention score:
+Một baseline ban đầu có thể sử dụng:
 
 ```text
                   current_views - historical_mean
@@ -163,37 +163,37 @@ attention_score = --------------------------------
                     historical_std + epsilon
 ```
 
-This may later be improved using:
+Sau đó có thể thử:
 
-- Rolling averages
+- Rolling average
 - Z-score
 - Relative growth
-- Exponential moving averages
-- Hour-of-day baseline
-- Day-of-week baseline
+- Exponential moving average
+- Baseline theo giờ trong ngày
+- Baseline theo ngày trong tuần
 
-The final metric should remain:
+Metric cuối cùng cần:
 
-- Transparent
-- Explainable
-- Scalable
-- Easy to validate
+- Dễ giải thích
+- Minh bạch
+- Có thể kiểm chứng
+- Có khả năng tính toán trên dữ liệu lớn
 
 ---
 
-## 7. System Experiments
+## 7. Các thí nghiệm hệ thống
 
-### Experiment 1 — Raw vs Pre-aggregated Queries
+### Thí nghiệm 1 — Raw vs Pre-aggregated Query
 
-Compare queries executed on:
+So sánh truy vấn trên:
 
 ```text
 Raw pageview data
 vs
-Pre-aggregated hourly/daily tables
+Bảng aggregate theo giờ/ngày
 ```
 
-Measure:
+Đo:
 
 - Query latency
 - Bytes scanned
@@ -202,11 +202,11 @@ Measure:
 
 ---
 
-### Experiment 2 — Partitioning
+### Thí nghiệm 2 — Partitioning
 
-Compare at least two layouts.
+So sánh ít nhất hai cách partition.
 
-Example:
+Ví dụ:
 
 ```text
 Layout A:
@@ -216,19 +216,19 @@ Layout B:
 year/month/day/hour
 ```
 
-Measure:
+Đo:
 
 - Query latency
-- Files scanned
-- Bytes scanned
-- Number of files
-- Over-partitioning effects
+- Số file được đọc
+- Dữ liệu được scan
+- Tổng số file
+- Ảnh hưởng của over-partitioning
 
 ---
 
-### Experiment 3 — Scale-out
+### Thí nghiệm 3 — Scale-out
 
-Run the same Spark workload with:
+Chạy cùng một workload Spark với:
 
 ```text
 1 worker
@@ -236,7 +236,7 @@ Run the same Spark workload with:
 4 workers
 ```
 
-Measure:
+Đo:
 
 - Runtime
 - Throughput
@@ -246,9 +246,9 @@ Measure:
 
 ---
 
-### Experiment 4 — Streaming Throughput
+### Thí nghiệm 4 — Streaming Throughput
 
-Replay historical data at increasing rates:
+Replay dữ liệu lịch sử với tốc độ tăng dần:
 
 ```text
 1x
@@ -258,7 +258,7 @@ Replay historical data at increasing rates:
 ...
 ```
 
-Measure:
+Đo:
 
 - Input records/s
 - Processing records/s
@@ -266,56 +266,54 @@ Measure:
 - End-to-end latency
 - CPU / memory usage
 
-Determine when:
+Xác định thời điểm:
 
 ```text
 input rate > processing capacity
 ```
 
-and the system begins falling behind.
+và hệ thống bắt đầu không theo kịp dữ liệu đầu vào.
 
 ---
 
-### Experiment 5 — Fault Tolerance
+### Thí nghiệm 5 — Fault Tolerance
 
-During a running distributed job:
+Trong khi một job phân tán đang chạy:
 
-1. Terminate one Spark worker/executor.
-2. Observe system recovery.
-3. Measure recovery time.
-4. Inspect checkpoints.
-5. Check for missing windows.
-6. Check for duplicate records.
-7. Analyze recovery and processing semantics.
+1. Dừng một Spark worker/executor.
+2. Quan sát hệ thống phục hồi.
+3. Đo recovery time.
+4. Kiểm tra checkpoint.
+5. Kiểm tra missing windows.
+6. Kiểm tra duplicate records.
+7. Phân tích processing semantics sau khi phục hồi.
 
 ---
 
 ## 8. Dashboard
 
-The dashboard is planned to contain the following views.
-
 ### Overview
 
-- Total pageviews
-- Active pages
-- Current top pages
-- Active attention bursts
+- Tổng pageview
+- Số trang đang hoạt động
+- Top page hiện tại
+- Số attention burst đang xảy ra
 
 ### Trending
 
-- Rapid-growth pages
-- Attention scores
+- Trang tăng trưởng nhanh
+- Attention score
 - Burst duration
 
 ### Historical Trends
 
-- Hourly traffic
-- Daily traffic
-- Weekly traffic
+- Traffic theo giờ
+- Traffic theo ngày
+- Traffic theo tuần
 
 ### Page Detail
 
-For each selected page:
+Với từng page:
 
 - Pageview time series
 - Attention score
@@ -324,11 +322,11 @@ For each selected page:
 
 ### Language Comparison
 
-- Vietnamese Wikipedia
-- English Wikipedia
-- Selected cross-language trends
+- Wikipedia tiếng Việt
+- Wikipedia tiếng Anh
+- Một số xu hướng có thể so sánh giữa hai ngôn ngữ
 
-### System Monitoring — Optional
+### System Monitoring — tùy chọn
 
 - Kafka lag
 - Spark processing rate
@@ -337,7 +335,7 @@ For each selected page:
 
 ---
 
-## 9. Repository Structure
+## 9. Cấu trúc repository
 
 ```text
 wikipedia-attention-observatory/
@@ -394,50 +392,50 @@ wikipedia-attention-observatory/
 
 ---
 
-## 10. Development Roadmap
+## 10. Roadmap 12 tuần
 
-### Week 1 — Dataset Exploration
+### Tuần 1 — Khảo sát dữ liệu
 
-- Study Wikimedia pageview format
-- Download sample files
-- Define project scope
-- Estimate data volume
-- Create GitHub repository
-- Define initial schema
+- Tìm hiểu format Wikimedia pageview
+- Download một số file mẫu
+- Chốt phạm vi project
+- Ước lượng dung lượng dữ liệu
+- Tạo GitHub repository
+- Xác định schema ban đầu
 
-### Week 2 — Architecture Design
+### Tuần 2 — Thiết kế kiến trúc
 
-- Finalize architecture
-- Design raw / curated / aggregate layers
-- Define partitioning candidates
-- Define experiments
-- Define initial attention metric
+- Chốt architecture
+- Thiết kế raw / curated / aggregate layer
+- Chọn các phương án partition
+- Thiết kế các experiment
+- Định nghĩa attention metric ban đầu
 
-### Week 3 — Distributed Environment
+### Tuần 3 — Môi trường phân tán
 
-- Set up Kubernetes
+- Thiết lập Kubernetes
 - Deploy MinIO
 - Deploy Spark
-- Test multi-worker Spark processing
+- Kiểm tra Spark chạy với nhiều worker
 
-### Week 4 — Ingestion
+### Tuần 4 — Ingestion
 
-- Build automatic Wikimedia downloader
-- Preserve immutable raw data
-- Store files in MinIO
-- Add ingestion metadata and logs
+- Viết Wikimedia downloader
+- Giữ nguyên raw data
+- Lưu raw data vào MinIO
+- Thêm log và metadata cho ingestion
 
-### Week 5 — Curated Storage
+### Tuần 5 — Curated Storage
 
 - Parse raw records
-- Filter selected Wikimedia projects
-- Clean and normalize data
-- Write Parquet / Iceberg
-- Implement partitioning
+- Lọc các Wikimedia project cần dùng
+- Làm sạch và chuẩn hóa dữ liệu
+- Ghi Parquet / Iceberg
+- Thiết kế partition
 
-### Week 6 — Batch Processing
+### Tuần 6 — Batch Processing
 
-Implement:
+Thực hiện:
 
 - Top pages
 - Hourly aggregates
@@ -445,9 +443,9 @@ Implement:
 - Weekly statistics
 - Long-tail analysis
 
-### Week 7 — Attention Analytics
+### Tuần 7 — Attention Analytics
 
-Implement:
+Thực hiện:
 
 - Historical baseline
 - Rapid-growth detection
@@ -455,56 +453,56 @@ Implement:
 - Burst duration
 - Short-lived / sustained / recurring attention
 
-### Week 8 — Streaming
+### Tuần 8 — Streaming
 
 - Deploy Kafka
-- Replay historical data
-- Implement Spark Structured Streaming
-- Configure checkpoints
-- Produce streaming aggregates
+- Replay dữ liệu lịch sử
+- Xây Spark Structured Streaming
+- Thiết lập checkpoints
+- Sinh streaming aggregates
 
-### Week 9 — Serving and Dashboard
+### Tuần 9 — Serving và Dashboard
 
 - Deploy ClickHouse
-- Create analytical tables
-- Connect Superset
-- Build dashboard
-- Integrate batch and streaming results
+- Tạo analytical tables
+- Kết nối Superset
+- Xây dashboard
+- Tích hợp batch và streaming
 
-### Week 10 — Scalability
+### Tuần 10 — Scalability
 
-Run:
+Chạy:
 
 - Raw vs aggregate benchmark
 - Partitioning benchmark
-- 1 / 2 / 4 worker benchmark
+- Benchmark 1 / 2 / 4 worker
 - Streaming replay-rate benchmark
 
-### Week 11 — Fault Tolerance
+### Tuần 11 — Fault Tolerance
 
-- Kill a worker/executor
-- Observe recovery
-- Analyze checkpoints
-- Check missing and duplicate data
-- Record recovery metrics
+- Kill một worker/executor
+- Quan sát quá trình phục hồi
+- Phân tích checkpoint
+- Kiểm tra missing/duplicate data
+- Ghi lại recovery metrics
 
-### Week 12 — Finalization
+### Tuần 12 — Hoàn thiện
 
-- Clean repository
-- Verify reproducibility
-- Finalize dashboard
-- Finalize experiment results
-- Write technical report
-- Prepare presentation
-- Prepare end-to-end demo
+- Dọn repository
+- Kiểm tra reproducibility
+- Hoàn thiện dashboard
+- Tổng hợp experiment results
+- Viết technical report
+- Chuẩn bị presentation
+- Chuẩn bị end-to-end demo
 
 ---
 
-## 11. Team Responsibilities
+## 11. Phân chia công việc nhóm
 
-### Member 1 — Infrastructure / Platform
+### Thành viên 1 — Infrastructure / Platform
 
-Responsible for:
+Phụ trách:
 
 - Kubernetes
 - MinIO
@@ -513,35 +511,35 @@ Responsible for:
 - Monitoring
 - Fault-tolerance experiments
 
-### Member 2 — Data / Processing
+### Thành viên 2 — Data / Processing
 
-Responsible for:
+Phụ trách:
 
 - Wikimedia downloader
-- Parsing and cleaning
+- Parsing và cleaning
 - Schema design
 - Spark Batch
 - Spark Structured Streaming
 - Partitioning
 
-### Member 3 — Analytics / Serving
+### Thành viên 3 — Analytics / Serving
 
-Responsible for:
+Phụ trách:
 
 - Attention metric
 - ClickHouse
 - Analytical SQL
 - Superset
 - Dashboard
-- Result interpretation
+- Phân tích kết quả
 
-All members should understand the complete architecture and participate in integration, experiments, report writing, and presentation.
+Tất cả thành viên cần hiểu toàn bộ pipeline và cùng tham gia integration, experiment, report và presentation.
 
 ---
 
 ## 12. MVP
 
-The first end-to-end MVP should be:
+MVP đầu tiên nên là:
 
 ```text
 Wikimedia Dumps
@@ -557,70 +555,70 @@ Wikimedia Dumps
     Superset
 ```
 
-Only after this pipeline works reliably:
+Chỉ sau khi pipeline trên chạy ổn định mới thêm:
 
 ```text
-Add Kafka
-    ↓
-Add Structured Streaming
-    ↓
-Add Checkpoints
-    ↓
-Add Iceberg
-    ↓
-Run Scalability Experiments
-    ↓
-Run Fault-Injection Experiments
+Kafka
+  ↓
+Spark Structured Streaming
+  ↓
+Checkpoints
+  ↓
+Iceberg
+  ↓
+Scalability Experiments
+  ↓
+Fault-Injection Experiments
 ```
 
 ---
 
 ## 13. Stretch Goals
 
-After the baseline system is complete:
+Sau khi baseline hoàn chỉnh:
 
-- Wikimedia Recent Changes integration
+- Wikimedia Recent Changes
 - Multilingual attention correlation
 - ClickHouse vs Druid
 - Late-data handling
 - Watermark experiments
 - Incremental materialized views
 - Automated burst alerts
-- More advanced anomaly detection
+- Anomaly detection nâng cao
 
-Machine learning is optional and should not replace the distributed-system objectives.
+Machine Learning chỉ nên là phần mở rộng, không thay thế mục tiêu về Big Data systems.
 
 ---
 
 ## 14. Definition of Done
 
-- [ ] Repository structure completed
-- [ ] Automated Wikimedia ingestion works
-- [ ] Immutable raw data is preserved
-- [ ] Curated storage is generated
-- [ ] Spark runs on multiple workers
-- [ ] Batch analytics works
-- [ ] Attention metric works
-- [ ] Kafka replay works
-- [ ] Spark Structured Streaming works
-- [ ] Checkpointing works
-- [ ] ClickHouse serves analytical queries
-- [ ] Superset dashboard works
-- [ ] Raw vs aggregate benchmark completed
-- [ ] Partitioning benchmark completed
-- [ ] 1 / 2 / 4 worker experiment completed
-- [ ] Streaming throughput experiment completed
-- [ ] Fault-recovery experiment completed
-- [ ] Experiment results are reproducible
-- [ ] Final technical report completed
-- [ ] 15–20 minute presentation completed
-- [ ] End-to-end demo ready
+- [ ] Hoàn thiện cấu trúc repository
+- [ ] Wikimedia ingestion chạy tự động
+- [ ] Raw data được lưu nguyên vẹn
+- [ ] Curated storage hoạt động
+- [ ] Spark chạy trên nhiều worker
+- [ ] Batch analytics hoạt động
+- [ ] Attention metric hoạt động
+- [ ] Kafka replay hoạt động
+- [ ] Spark Structured Streaming hoạt động
+- [ ] Checkpointing hoạt động
+- [ ] ClickHouse phục vụ truy vấn
+- [ ] Superset dashboard hoạt động
+- [ ] Hoàn thành raw vs aggregate benchmark
+- [ ] Hoàn thành partitioning benchmark
+- [ ] Hoàn thành 1 / 2 / 4 worker experiment
+- [ ] Hoàn thành streaming throughput experiment
+- [ ] Hoàn thành fault-recovery experiment
+- [ ] Experiment có thể tái lập
+- [ ] Hoàn thành technical report
+- [ ] Hoàn thành presentation 15–20 phút
+- [ ] End-to-end demo sẵn sàng
 
 ---
 
-## 15. Team
+## 15. Nhóm
 
-| Member | Role |
+| Thành viên | Vai trò |
 |---|---|
 | Member 1 | Infrastructure / Platform |
 | Member 2 | Data / Processing |
@@ -628,7 +626,7 @@ Machine learning is optional and should not replace the distributed-system objec
 
 ---
 
-## 16. Course
+## 16. Học phần
 
 **Big Data Storage and Processing**
 
