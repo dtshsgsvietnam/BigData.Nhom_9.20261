@@ -2,6 +2,10 @@
 
 > Học phần: Big Data Storage and Processing — Project 5
 
+## Project Management
+
+- [Product Backlog](./PRODUCT_BACKLOG.md)
+
 ## 1. Tổng quan
 
 **Wikipedia Attention Observatory** là một nền tảng Big Data phân tán dùng để phân tích cách mức độ chú ý của cộng đồng thay đổi theo thời gian dựa trên dữ liệu pageview theo giờ của Wikimedia.
