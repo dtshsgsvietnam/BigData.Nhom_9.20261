@@ -1,0 +1,56 @@
+# Python virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Python bytecode and tool caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.pyre/
+.ipynb_checkpoints/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+
+# Local secrets (safe templates may be committed)
+.env
+.env.*
+!.env.example
+!.env.sample
+!.env.template
+
+# Local datasets; retain directory placeholders
+/data/**
+!/data/**/
+!/data/**/.gitkeep
+
+# Logs and temporary files
+*.log
+logs/
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+tmp/
+temp/
+
+# Build and package outputs
+build/
+dist/
+*.egg-info/
+.eggs/
+.cache/
+
+# Local editor and operating system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+Desktop.ini
