@@ -4,9 +4,10 @@
 
 Phân tích cách mức độ chú ý trên Wikipedia thay đổi theo thời gian bằng dữ liệu pageview theo giờ, đồng thời đánh giá hệ thống batch/stream về tính đúng, tốc độ, khả năng mở rộng và phục hồi sau lỗi.
 
-**Tình trạng tài liệu:** bản thiết kế và kế hoạch cập nhật ngày 10/11/2026. Các công nghệ, đường dữ liệu và checklist dưới đây là mục tiêu triển khai; chưa xác nhận chúng đã hoạt động trong repository hiện tại. Tiến độ thực tế được cập nhật trên issue board.
+**Tình trạng:** README mô tả kiến trúc và kế hoạch cập nhật ngày 10/11/2026. Phần DATA hiện có downloader, parser và Spark Batch MVP trong repository; các thành phần hạ tầng, replay/stream, serving và dashboard vẫn theo kế hoạch, cần kiểm chứng trên môi trường nhóm.
 
 - Quản lý công việc: [PRODUCT_BACKLOG.md](./PRODUCT_BACKLOG.md).
+- Hướng dẫn chạy phần DATA: [docs/data-role.md](./docs/data-role.md).
 - Nguồn yêu cầu: đề Project Topics 2026, Common Requirements và Project 5.
 - Nhóm triển khai theo các mốc chạy được, tích hợp sớm và tăng dữ liệu dần.
 
