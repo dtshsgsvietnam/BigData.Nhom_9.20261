@@ -16,8 +16,14 @@
 | PB-002 | Hoàn thiện README mô tả project | C | W1 |
 | PB-003 | Thiết lập GitHub Project board và workflow | A | W1 |
 | PB-004 | Chốt phạm vi dữ liệu: enwiki, viwiki và khoảng thời gian | B+C | W1 |
-| PB-005 | Thiết kế architecture v1 | A+C | W2 |
+| PB-005 | [Architecture và ranh giới các nhánh](docs/architecture.md) | PLATFORM | W2 |
 | PB-006 | Lập kế hoạch benchmark và fault-tolerance experiment | A+B+C | W2 |
+| PB-007 | Schema, event identity và output contract dùng chung | DATA | W1-W2 |
+
+PB-005 phụ thuộc PB-007. [Bằng chứng PB-005](reports/pb005/evidence.md) ghi rõ
+phần đã kiểm chứng và các ký nhận/review còn chờ. PB-007 phụ thuộc PB-004,
+PB-101; DATA định nghĩa contract, STREAM/PLATFORM ký nhận. Các dòng còn lại
+trong backlog giữ nguyên từ bản cũ, chưa được đồng bộ toàn bộ với GitHub v2.
 
 ## Ingestion
 

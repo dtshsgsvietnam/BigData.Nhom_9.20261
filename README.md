@@ -5,6 +5,8 @@
 ## Project Management
 
 - [Product Backlog](./PRODUCT_BACKLOG.md)
+- [Architecture v1 và ranh giới hai nhánh — PB-005](./docs/architecture.md)
+- [Bằng chứng và cách chạy lại PB-005](./reports/pb005/evidence.md)
 
 ## 1. Tổng quan
 
@@ -69,35 +71,47 @@ hour
 
 ---
 
-## 4. Kiến trúc đề xuất
+## 4. Kiến trúc v1 — PB-005
 
 ```text
-                  Wikimedia Pageview Dumps
-                            |
-               +------------+------------+
-               |                         |
-               v                         v
-          Downloader                 Kafka Replay
-               |                         |
-               v                         v
-        MinIO / Object Storage     Spark Structured
-               |                    Streaming
-               v                         |
-          Spark Batch                    |
-               |                         |
-               +------------+------------+
-                            |
-                            v
-                    Parquet / Iceberg
-                            |
-                            v
-                       ClickHouse
-                            |
-                            v
-                    Apache Superset
-                            |
-                            v
-                        Dashboard
+                    Wikimedia Pageview Dumps
+                              |
+                         Downloader
+                              |
+                MinIO: immutable raw snapshot
+                  + manifest + file checksums
+                              |
+               +--------------+--------------+
+               |                             |
+          Spark Batch                  Replay producer
+               |                             |
+               |                           Kafka
+               |                             |
+               |                  Spark Structured Streaming
+               |                             |
+        History output                 Replay output
+        Batch progress             Streaming checkpoint
+               |                             |
+        History loader                 Replay loader
+               |                             |
+    ClickHouse pageviews_history  ClickHouse pageviews_replay
+               |                             |
+               +--------------+--------------+
+                              |
+                Compare selected runs / Superset
+```
+
+Hai nhánh đọc **cùng raw snapshot**, tách output/checkpoint và bảng serving.
+Chi tiết đường dẫn, trách nhiệm, loader và phụ thuộc PB-007 nằm trong
+[architecture.md](./docs/architecture.md). Parquet là baseline v1; Iceberg là mở rộng.
+Hiện repo có proof local JSON/SQLite; chưa triển khai các dịch vụ phân tán.
+Contract trong proof là bản nháp, chờ DATA/STREAM/PLATFORM ký nhận ở PB-007.
+
+Kiểm chứng local, chỉ cần Python 3 và thư viện chuẩn (đường dẫn workspace phải mới):
+
+```powershell
+python scripts/verify_pb005.py --workspace data/pb005-review-001
+python -m unittest discover -s tests -p "test_*.py" -v
 ```
 
 ### Công nghệ dự kiến
@@ -342,57 +356,32 @@ Với từng page:
 ## 9. Cấu trúc repository
 
 ```text
-wikipedia-attention-observatory/
-│
+BigData.Nhom_9.20261/
 ├── README.md
-├── .gitignore
-│
-├── docs/
-│   ├── architecture.md
-│   ├── data_model.md
-│   ├── attention_metric.md
-│   └── experiments.md
-│
-├── infra/
-│   ├── kubernetes/
-│   ├── kafka/
-│   ├── spark/
-│   ├── minio/
-│   ├── clickhouse/
-│   └── superset/
-│
-├── ingestion/
-│   ├── downloader/
-│   └── replay/
-│
-├── processing/
-│   ├── batch/
-│   ├── streaming/
-│   └── common/
-│
-├── sql/
-│   ├── ddl/
-│   ├── analytics/
-│   └── experiments/
-│
-├── dashboard/
-│
-├── experiments/
-│   ├── raw_vs_aggregate/
-│   ├── partitioning/
-│   ├── scale_out/
-│   ├── streaming_rate/
-│   └── fault_tolerance/
-│
-├── tests/
-│
-├── scripts/
-│
+├── PRODUCT_BACKLOG.md
 ├── config/
-│
-└── reports/
-    └── results/
+│   └── architecture.json
+├── docs/
+│   └── architecture.md
+├── scripts/
+│   └── verify_pb005.py
+├── tests/
+│   ├── fixtures/pb005/          # Synthetic raw snapshot + manifest
+│   └── test_pb005.py
+├── reports/
+│   └── pb005/                  # Evidence và kết quả kiểm chứng
+├── data/                       # Local output, không commit
+├── infra/                      # Khung cho triển khai hạ tầng
+├── ingestion/                  # Khung cho downloader/replay producer
+├── processing/                 # Khung cho batch/streaming/common
+├── storage/                    # Khung cho layout/partition
+├── serving/                    # Khung cho loader/DDL/SQL
+├── dashboard/
+└── experiments/
 ```
+
+Các thư mục ghi “khung” và `dashboard/`, `experiments/` hiện chỉ có placeholder;
+phân chia trách nhiệm được mô tả trong tài liệu PB-005.
 
 ---
 

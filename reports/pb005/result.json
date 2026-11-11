@@ -1,0 +1,31 @@
+{
+  "status": "PASS",
+  "scope": "local architecture proof; no Spark/Kafka/ClickHouse deployment",
+  "snapshot_id": "pb005-fixture-v1",
+  "run_id": "pb005-evidence-002",
+  "contract_status": "pending-data-stream-platform-signoff",
+  "config_sha256": "b8a46a3a923dc93b0131044619c32e016db10d353f13ca0014cebe155b164a76",
+  "manifest_sha256": "fdbf38afa48bb46396d9e2f85534d921b69e0b0a39400c76a526a9e5001f24cb",
+  "python": "3.12.11",
+  "machine": "win32",
+  "checks": [
+    "raw checksums",
+    "isolated namespaces",
+    "same events and values",
+    "interrupted replay resume",
+    "history checkpoint unchanged",
+    "stable event IDs across runs",
+    "idempotent loaders",
+    "raw unchanged"
+  ],
+  "tables": {
+    "pageviews_history": {
+      "rows": 6,
+      "views": 45
+    },
+    "pageviews_replay": {
+      "rows": 6,
+      "views": 45
+    }
+  }
+}
