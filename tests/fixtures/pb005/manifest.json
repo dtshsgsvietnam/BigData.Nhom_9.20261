@@ -1,0 +1,16 @@
+{
+  "snapshot_id": "pb005-fixture-v1",
+  "synthetic": true,
+  "files": [
+    {
+      "name": "pageviews-20261101-000000",
+      "sha256": "ceff0b100300c1a8e8880f48216278990a5acff1716c90667163cd35a1eddc65",
+      "event_time": "2026-11-01T00:00:00Z"
+    },
+    {
+      "name": "pageviews-20261101-010000",
+      "sha256": "d4872604b5af3796dc5e33a445f1570e60031d5953109a642927d9630c55b455",
+      "event_time": "2026-11-01T01:00:00Z"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "architecture_version": "1",
+  "contract_version": "pb007-draft-v1",
+  "contract_status": "pending-data-stream-platform-signoff",
+  "snapshot_id": "pb005-fixture-v1",
+  "raw_uri": "s3://wao/raw/snapshots/{snapshot_id}/",
+  "branches": {
+    "history": {
+      "output_uri": "s3://wao/outputs/history/{snapshot_id}/{run_id}/",
+      "checkpoint_uri": "s3://wao/checkpoints/history/{snapshot_id}/{run_id}/",
+      "table": "pageviews_history"
+    },
+    "replay": {
+      "output_uri": "s3://wao/outputs/replay/{snapshot_id}/{run_id}/",
+      "checkpoint_uri": "s3://wao/checkpoints/replay/{snapshot_id}/{run_id}/",
+      "table": "pageviews_replay"
+    }
+  }
+}
