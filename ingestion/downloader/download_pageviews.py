@@ -6,6 +6,7 @@ import argparse
 import gzip
 import hashlib
 import json
+import logging
 import os
 import time
 import zlib
@@ -17,10 +18,21 @@ from urllib.request import Request, urlopen
 
 BASE_URL = "https://dumps.wikimedia.org/other/pageviews"
 USER_AGENT = "WikipediaAttentionObservatory/1.0 (academic project)"
+LOG = logging.getLogger(__name__)
+
+
+def utc_hour(value: datetime) -> datetime:
+    if value.tzinfo is None or value.utcoffset() is None:
+        raise ValueError('Timestamps must include a timezone')
+    value = value.astimezone(timezone.utc)
+    if value.minute or value.second or value.microsecond:
+        raise ValueError('Timestamps must be aligned to UTC hours')
+    return value
 
 
 def dump_url(hour_end: datetime) -> str:
     """Return the Wikimedia URL for the hour ending at *hour_end* (UTC)."""
+    hour_end = utc_hour(hour_end)
     stamp = hour_end.strftime("%Y%m%d-%H0000")
     return f"{BASE_URL}/{hour_end:%Y/%Y-%m}/pageviews-{stamp}.gz"
 
@@ -63,6 +75,7 @@ def download_hour(
     retries: int = 3,
 ) -> dict[str, Any]:
     """Download one compressed dump, preserve it locally, and optionally upload it."""
+    hour_end = utc_hour(hour_end)
     url = dump_url(hour_end)
     filename = url.rsplit("/", 1)[-1]
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -86,6 +99,7 @@ def download_hour(
     else:
         status = "downloaded"
         for attempt in range(retries):
+            LOG.info('download hour=%s attempt=%d url=%s', hour_end.isoformat(), attempt + 1, url)
             try:
                 request = Request(url, headers={"User-Agent": USER_AGENT})
                 with urlopen(request, timeout=90) as response, partial.open("wb") as target:
@@ -126,6 +140,9 @@ def _manifest_entry(
 ) -> dict[str, Any]:
     entry: dict[str, Any] = {
         "hour_end": hour_end.astimezone(timezone.utc).isoformat(),
+        "hour_start": (hour_end - timedelta(hours=1)).astimezone(timezone.utc).isoformat(),
+        "recorded_at": datetime.now(timezone.utc).isoformat(),
+        "manifest_version": "1",
         "source_url": url,
         "raw_uri": raw_uri,
         "status": status,
@@ -137,10 +154,10 @@ def _manifest_entry(
 
 def iter_hours(start: datetime, end: datetime):
     """Yield UTC hour-end timestamps in [start, end), requiring aligned hours."""
-    current = start.astimezone(timezone.utc)
-    stop = end.astimezone(timezone.utc)
-    if current.minute or current.second or current.microsecond or stop.minute or stop.second or stop.microsecond:
-        raise ValueError("start and end must be aligned to UTC hours")
+    current = utc_hour(start)
+    stop = utc_hour(end)
+    if stop <= current:
+        raise ValueError('end must be after start')
     while current < stop:
         yield current
         current += timedelta(hours=1)
@@ -154,25 +171,50 @@ def main() -> None:
     parser.add_argument("--manifest", default="data/manifests/pageviews.jsonl")
     parser.add_argument("--bucket", help="Optional MinIO/S3 bucket; credentials use AWS_* env vars")
     parser.add_argument("--endpoint-url", help="MinIO endpoint, e.g. http://localhost:9000")
+    parser.add_argument('--retries', type=int, default=3)
+    parser.add_argument('--layout', choices=('flat', 'dated'), default='dated')
+    parser.add_argument('--log-file', help='Optional persistent ingestion log')
     args = parser.parse_args()
+    if args.retries < 1:
+        parser.error('--retries must be >= 1')
+    logging.basicConfig(level=logging.INFO, filename=args.log_file,
+                        format='%(asctime)s %(levelname)s %(message)s')
     parse_time = lambda value: datetime.fromisoformat(value.replace("Z", "+00:00"))
-    start, end = parse_time(args.start), parse_time(args.end)
+    try:
+        start, end = utc_hour(parse_time(args.start)), utc_hour(parse_time(args.end))
+        if end <= start:
+            raise ValueError('end must be after start')
+    except ValueError as exc:
+        parser.error(str(exc))
     manifest_path = Path(args.manifest)
     manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    failures = 0
     with manifest_path.open("a", encoding="utf-8") as manifest:
         for hour_end in iter_hours(start, end):
-            entry = download_hour(
-                hour_end,
-                Path(args.output),
-                bucket=args.bucket,
-                endpoint_url=args.endpoint_url,
-            )
+            started = time.monotonic()
+            output = Path(args.output)
+            if args.layout == 'dated':
+                output = output / hour_end.strftime('%Y/%m/%d')
+            try:
+                entry = download_hour(hour_end, output, bucket=args.bucket,
+                                      endpoint_url=args.endpoint_url, retries=args.retries)
+            except Exception as exc:
+                # Preserve a manifest entry even if storage/upload fails for this hour.
+                LOG.exception('ingestion failed for %s', hour_end.isoformat())
+                entry = _manifest_entry(hour_end, dump_url(hour_end), None, 'failed', error=str(exc))
+            entry['duration_seconds'] = round(time.monotonic() - started, 6)
+            if entry['status'] in ('failed', 'missing'):
+                failures += 1
             manifest.write(json.dumps(entry, ensure_ascii=False) + "\n")
+            manifest.flush()
+            LOG.info('hour=%s status=%s duration_seconds=%s', entry['hour_end'], entry['status'], entry['duration_seconds'])
             print(json.dumps(entry, ensure_ascii=False))
     if args.bucket:
         _s3_client(args.endpoint_url).upload_file(
-            str(manifest_path), args.bucket, "manifests/pageviews.jsonl"
+            str(manifest_path), args.bucket, f"manifests/{manifest_path.name}"
         )
+    if failures:
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":

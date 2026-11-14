@@ -1,5 +1,7 @@
 # Wikipedia Attention Observatory
 
+Triển khai DATA: [hợp đồng dữ liệu](docs/data-contract.md), [hướng dẫn chạy](docs/data-role.md) và [tiến độ 15 issue kèm bằng chứng kiểm tra](docs/data-issues-progress.md).
+
 > Big Data Storage and Processing - Project 5 | Nhóm 3 người | Kế hoạch 12 tuần
 
 Phân tích cách mức độ chú ý trên Wikipedia thay đổi theo thời gian bằng dữ liệu pageview theo giờ, đồng thời đánh giá hệ thống batch/stream về tính đúng, tốc độ, khả năng mở rộng và phục hồi sau lỗi.

@@ -2,6 +2,8 @@
 > Nhóm 3 thành viên • 12 tuần  
 > Không dùng Priority; quản lý bằng **Status + Epic + Assignee + Week**.
 
+Tiến độ triển khai và bằng chứng kiểm tra của 15 issue DATA: [data-issues-progress.md](docs/data-issues-progress.md).
+
 ## Quy ước
 - **DATA** — Downloader, parser, curated, batch và attention
 - **STREAM** — Replay, Kafka contract, streaming và recovery

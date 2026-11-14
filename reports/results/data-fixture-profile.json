@@ -1,0 +1,131 @@
+{
+  "schema_version": "3",
+  "files": [
+    {
+      "source_file": "pageviews-20260101-000000.gz",
+      "hour_start": "2025-12-31T23:00:00+00:00",
+      "hour_end": "2026-01-01T00:00:00+00:00",
+      "checksum_sha256": "8e04efe1f6e08c072ee76aa091528a300077fd5df14468734d2d5eb2c7651368",
+      "compressed_bytes": 141,
+      "inspected_raw_bytes": 158,
+      "rows": 12,
+      "valid_rows": 5,
+      "excluded_rows": 2,
+      "rejected_rows": 5,
+      "total_views": 30,
+      "complete": true,
+      "field_counts": {
+        "4": 2,
+        "3": 8,
+        "6": 1,
+        "1": 1
+      },
+      "domains": {
+        "en": 3,
+        "en.m": 1,
+        "vi": 1
+      },
+      "reject_reasons": {
+        "negative_views": 1,
+        "invalid_views": 2,
+        "empty_title": 1,
+        "invalid_field_count": 1
+      }
+    },
+    {
+      "source_file": "pageviews-20260101-010000.gz",
+      "hour_start": "2026-01-01T00:00:00+00:00",
+      "hour_end": "2026-01-01T01:00:00+00:00",
+      "checksum_sha256": "f567b269d06c5cc5f5a7f103a8690e8b9f34692ab2331939c4daf9fb64202a0b",
+      "compressed_bytes": 53,
+      "inspected_raw_bytes": 36,
+      "rows": 3,
+      "valid_rows": 3,
+      "excluded_rows": 0,
+      "rejected_rows": 0,
+      "total_views": 19,
+      "complete": true,
+      "field_counts": {
+        "3": 3
+      },
+      "domains": {
+        "en": 1,
+        "vi": 1,
+        "vi.m": 1
+      },
+      "reject_reasons": {}
+    },
+    {
+      "source_file": "pageviews-20260105-000000.gz",
+      "hour_start": "2026-01-04T23:00:00+00:00",
+      "hour_end": "2026-01-05T00:00:00+00:00",
+      "checksum_sha256": "9993f69362b732ebe7807bb588fc8a1f4564b57b7fe68260a4307dca50ad82cb",
+      "compressed_bytes": 31,
+      "inspected_raw_bytes": 11,
+      "rows": 1,
+      "valid_rows": 1,
+      "excluded_rows": 0,
+      "rejected_rows": 0,
+      "total_views": 6,
+      "complete": true,
+      "field_counts": {
+        "3": 1
+      },
+      "domains": {
+        "en": 1
+      },
+      "reject_reasons": {}
+    },
+    {
+      "source_file": "pageviews-20260105-010000.gz",
+      "hour_start": "2026-01-05T00:00:00+00:00",
+      "hour_end": "2026-01-05T01:00:00+00:00",
+      "checksum_sha256": "447830a8fb78ad7d19027ae035f21610efaa31827a14af0fc814452fcbb5264c",
+      "compressed_bytes": 31,
+      "inspected_raw_bytes": 11,
+      "rows": 1,
+      "valid_rows": 1,
+      "excluded_rows": 0,
+      "rejected_rows": 0,
+      "total_views": 9,
+      "complete": true,
+      "field_counts": {
+        "3": 1
+      },
+      "domains": {
+        "en": 1
+      },
+      "reject_reasons": {}
+    }
+  ],
+  "totals": {
+    "rows": 17,
+    "valid_rows": 10,
+    "excluded_rows": 2,
+    "rejected_rows": 5,
+    "total_views": 64,
+    "compressed_bytes": 256,
+    "inspected_raw_bytes": 216
+  },
+  "domains": {
+    "en": 6,
+    "en.m": 1,
+    "vi": 2,
+    "vi.m": 1
+  },
+  "reject_reasons": {
+    "negative_views": 1,
+    "invalid_views": 2,
+    "empty_title": 1,
+    "invalid_field_count": 1
+  },
+  "target_hours": 24,
+  "estimated_target": {
+    "compressed_bytes": 1536.0,
+    "inspected_raw_bytes": 1296.0,
+    "rows": 102.0,
+    "valid_rows": 60.0
+  },
+  "estimate_warning": "Linear sample extrapolation; not a measured final dataset or Parquet size.",
+  "data_origin": "synthetic test fixture; not downloaded Wikimedia data"
+}

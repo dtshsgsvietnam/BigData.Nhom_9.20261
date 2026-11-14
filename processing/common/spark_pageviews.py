@@ -39,7 +39,7 @@ def read_raw_files(spark, input_glob):
 
 
 def parse_raw_lines(raw):
-    """Return (valid, rejected) DataFrames from raw_line/source_file columns."""
+    """Return (valid, rejected) DataFrames; input includes original source_line."""
     if "source_line" not in raw.columns:
         raise ValueError("raw input must include a stable source_line from the source reader")
     staged = raw
@@ -47,15 +47,16 @@ def parse_raw_lines(raw):
     staged = (
         staged.withColumn("field_count", F.size(fields))
         .withColumn("domain_code", fields.getItem(0))
-        .withColumn("page_title", fields.getItem(1))
-        .withColumn("raw_views", fields.getItem(2))
-        .withColumn("views", F.col("raw_views").cast("long"))
-        .withColumn("hour_end_text", F.regexp_extract("source_file", r"pageviews-(\d{8})-(\d{2})0000", 0))
+        .withColumn("page_title", F.get(fields, 1))
+        .withColumn("raw_views", F.get(fields, 2))
+        .withColumn("legacy_response_size", F.get(fields, 3))
+        .withColumn("views", F.when(F.col('raw_views').rlike(r'^-?[0-9]+$'), F.expr('try_cast(raw_views as bigint)')))
+        .withColumn("hour_end_text", F.regexp_extract("source_file", r"^pageviews-(\d{8})-(\d{2})0000(?:\.gz)?$", 0))
         .withColumn(
             "hour_end",
-            F.to_timestamp(
-                F.regexp_replace("hour_end_text", r"pageviews-(\d{8})-(\d{2})0000", "$1$2"),
-                "yyyyMMddHH",
+            F.try_to_timestamp(
+                F.regexp_replace("hour_end_text", r"pageviews-(\d{8})-(\d{2})0000(?:\.gz)?", "$1$2"),
+                F.lit("yyyyMMddHH"),
             ),
         )
         .withColumn("hour_start", F.expr("hour_end - INTERVAL 1 HOUR"))
@@ -81,10 +82,10 @@ def parse_raw_lines(raw):
     )
     valid = staged.filter(valid_shape & valid_project & valid_values).select(
         "hour_start", "hour_end", "domain_code", "project", "access_variant", "page_title",
-        "views", "source_file", "source_line", "event_id", "schema_version",
+        "views", "legacy_response_size", "source_file", "source_line", "event_id", "schema_version",
     )
     rejected = (
-        staged.filter(~valid_shape | (valid_project & ~valid_values))
+        staged.filter(valid_project & (~valid_shape | ~valid_values))
         .withColumn(
             "reject_reason",
             F.when(~valid_shape, F.lit("invalid_field_count"))
