@@ -5,7 +5,7 @@
       "source_file": "pageviews-20260101-000000.gz",
       "hour_start": "2025-12-31T23:00:00+00:00",
       "hour_end": "2026-01-01T00:00:00+00:00",
-      "checksum_sha256": "8e04efe1f6e08c072ee76aa091528a300077fd5df14468734d2d5eb2c7651368",
+      "checksum_sha256": "1a70133ca06a128c876d77ee658c026ce8da19e4f43c8b96696a0a76e0a89d72",
       "compressed_bytes": 141,
       "inspected_raw_bytes": 158,
       "rows": 12,

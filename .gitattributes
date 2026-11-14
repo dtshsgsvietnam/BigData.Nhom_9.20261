@@ -1,0 +1,2 @@
+# Keep fixture checksums and byte-count evidence stable on Windows and Linux.
+tests/fixtures/pageviews/* text eol=lf
