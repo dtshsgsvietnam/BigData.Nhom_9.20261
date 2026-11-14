@@ -6,7 +6,7 @@ import argparse
 from pyspark.sql import SparkSession, Window
 from pyspark.sql import functions as F
 
-from processing.common.spark_pageviews import parse_raw_lines
+from processing.common.spark_pageviews import parse_raw_lines, read_raw_files
 
 
 def run(input_glob: str, output_root: str, baseline_hours: int = 168) -> None:
@@ -14,8 +14,7 @@ def run(input_glob: str, output_root: str, baseline_hours: int = 168) -> None:
     spark.conf.set("spark.sql.session.timeZone", "UTC")
 
     # Spark's text reader decompresses .gz inputs and retains the source object path.
-    raw = spark.read.text(input_glob).withColumnRenamed("value", "raw_line")
-    raw = raw.withColumn("source_file", F.regexp_extract(F.input_file_name(), r"([^/\\]+)$", 1))
+    raw = read_raw_files(spark, input_glob)
     curated, rejected = parse_raw_lines(raw)
     curated.write.mode("overwrite").partitionBy("project", "hour_start").parquet(f"{output_root}/curated")
     rejected.write.mode("overwrite").parquet(f"{output_root}/quality/rejected")

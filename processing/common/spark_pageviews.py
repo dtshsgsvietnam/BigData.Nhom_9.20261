@@ -9,9 +9,40 @@ from pyspark.sql import functions as F
 from processing.common.pageviews import ALLOWED_DOMAINS, SCHEMA_VERSION
 
 
+def read_raw_files(spark, input_glob):
+    """Read each source in order and attach a stable, one-based line number.
+
+    zipWithIndex counts records in file order, independent of task partition IDs.
+    Paths must name files (local or Hadoop-supported storage), not directories.
+    """
+    jvm = spark.sparkContext._jvm
+    pattern = jvm.org.apache.hadoop.fs.Path(input_glob)
+    fs = pattern.getFileSystem(spark.sparkContext._jsc.hadoopConfiguration())
+    matches = fs.globStatus(pattern)
+    paths = sorted(str(item.getPath()) for item in (matches or []) if item.isFile())
+    if not paths:
+        raise ValueError(f"No input files matched {input_glob!r}")
+    names = [path.rsplit("/", 1)[-1] for path in paths]
+    if len(set(names)) != len(names):
+        raise ValueError("Source filenames must be unique within a snapshot")
+    sources = []
+    for path, name in zip(paths, names):
+        sources.append(
+            spark.sparkContext.textFile(path).zipWithIndex().map(
+                lambda pair, source=name: (pair[0], source, pair[1] + 1)
+            )
+        )
+    return spark.createDataFrame(
+        spark.sparkContext.union(sources),
+        "raw_line string, source_file string, source_line long",
+    )
+
+
 def parse_raw_lines(raw):
     """Return (valid, rejected) DataFrames from raw_line/source_file columns."""
-    staged = raw.withColumn("source_line", F.monotonically_increasing_id())
+    if "source_line" not in raw.columns:
+        raise ValueError("raw input must include a stable source_line from the source reader")
+    staged = raw
     fields = F.split(F.col("raw_line"), " ")
     staged = (
         staged.withColumn("field_count", F.size(fields))

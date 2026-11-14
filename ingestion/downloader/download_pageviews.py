@@ -8,6 +8,7 @@ import hashlib
 import json
 import os
 import time
+import zlib
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
@@ -46,6 +47,13 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def _validate_gzip(path: Path) -> None:
+    """Read through EOF so gzip verifies every member's CRC and trailer."""
+    with gzip.open(path, "rb") as source:
+        while source.read(1024 * 1024):
+            pass
+
+
 def download_hour(
     hour_end: datetime,
     output_dir: Path,
@@ -59,29 +67,42 @@ def download_hour(
     filename = url.rsplit("/", 1)[-1]
     output_dir.mkdir(parents=True, exist_ok=True)
     destination = output_dir / filename
+    partial = destination.with_suffix(destination.suffix + ".part")
 
+    if retries < 1:
+        raise ValueError("retries must be >= 1")
+
+    existing_valid = False
     if destination.exists():
+        try:
+            _validate_gzip(destination)
+            existing_valid = True
+        except (OSError, EOFError, zlib.error):
+            # Keep the old file until a verified replacement is available.
+            pass
+
+    if existing_valid:
         status = "already_present"
     else:
         status = "downloaded"
         for attempt in range(retries):
             try:
                 request = Request(url, headers={"User-Agent": USER_AGENT})
-                with urlopen(request, timeout=90) as response, destination.open("wb") as target:
+                with urlopen(request, timeout=90) as response, partial.open("wb") as target:
                     while chunk := response.read(1024 * 1024):
                         target.write(chunk)
                 # Catch interrupted or invalid responses before considering the file complete.
-                with gzip.open(destination, "rb") as source:
-                    source.read(1)
+                _validate_gzip(partial)
+                partial.replace(destination)
                 break
             except HTTPError as exc:
-                destination.unlink(missing_ok=True)
+                partial.unlink(missing_ok=True)
                 if exc.code == 404:
                     return _manifest_entry(hour_end, url, None, "missing", error="HTTP 404")
                 if attempt + 1 == retries:
                     return _manifest_entry(hour_end, url, None, "failed", error=str(exc))
-            except (URLError, OSError, EOFError) as exc:
-                destination.unlink(missing_ok=True)
+            except (URLError, OSError, EOFError, zlib.error) as exc:
+                partial.unlink(missing_ok=True)
                 if attempt + 1 == retries:
                     return _manifest_entry(hour_end, url, None, "failed", error=str(exc))
             time.sleep(min(2**attempt, 8))

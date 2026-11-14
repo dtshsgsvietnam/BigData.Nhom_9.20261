@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-SCHEMA_VERSION = "1"
+SCHEMA_VERSION = "2"
 ALLOWED_DOMAINS = {"en", "en.m", "vi", "vi.m"}
 
 

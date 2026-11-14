@@ -52,4 +52,9 @@ For MinIO, pass an `s3a://bucket/raw/.../pageviews-*.gz` input and configure Had
 - Attention is a first baseline implementation: trailing `--baseline-hours` observed page-hours, excluding the current hour, population standard deviation and a 1.0 score denominator floor. It emits a score and history count, not final burst labels. Tune these parameters and metric version before reporting results.
 - Downloader writes the manifest in append mode. Use a fresh manifest per dataset snapshot, or archive/clear it before a new independent download.
 - Malformed rows for the selected en/vi projects are written to `quality/rejected/` with a reason. Other projects are excluded by the project whitelist.
-- Spark generates `source_line` within a run; it can change if input partitioning changes. Keep the input snapshot and partitioning fixed for replay comparison, or replace this field with a stable source byte offset when cross-run identity is required.
+- `read_raw_files` assigns one-based `source_line` in each file before filtering. `event_id` is stable across repartitioning for the same source snapshot. Input filenames must be unique within a snapshot. Replay readers must supply the original filename and line number to `parse_raw_lines`; never renumber after filtering. Schema version 2 uses this identity contract.
+- Downloads are checked through gzip EOF (CRC/trailer), including cached files. New downloads use a `.part` file and replace the final path only after validation. Corrupt cached files are retried; a failed replacement is recorded as failed and is never uploaded.
+
+## Regression checks
+
+Run `python -m unittest discover -s tests -v`. Spark checks require the pinned PySpark dependency and Java; they are skipped when PySpark is absent.
